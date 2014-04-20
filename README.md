@@ -3,11 +3,13 @@ dtwp-sfwporn
 
 ## Desktop Wallpaper from reddit's SFW Porn Network ##
 
-A python script that grabs the top image from subreddits like EarthPorn and makes it the desktop wallpaper.
+A python script that grabs the top scoring jpg image from subreddits like EarthPorn on the SFW Porn Network, and 
+makes it the current desktop wallpaper.
 
-It does this without any extra packages. Every effort will be made to keep it like this, put PIL support may be needed in the future for advanced image editing techniques.
+It does this without needing any extra packages. Every effort will be made to keep it like this, put PIL support may be 
+needed in the future for advanced image editing techniques.
 
-Currently only tested on Win 7 with python 2.7, but should work with python 2.6. Other OS will be supported soon.
+Currently only tested on Win 7 with python 2.7, but should work with python 2.6. Other OS's will be supported soon.
 
 Install
 -------
