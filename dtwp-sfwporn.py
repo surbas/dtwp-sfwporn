@@ -4,6 +4,7 @@ import datetime
 import json
 import tempfile
 import os
+import re
 import urllib
 import urllib2
 import _winreg as winreg
@@ -85,14 +86,21 @@ def _parse_args():
                         type=str,
                         dest='style', help='The way the wallpaper should be displayed on desktop')
                         
-    parser.add_argument('-ua', action='store', default='dtwp-sfwporn/0.1 by sarkybogmozg', 
+    parser.add_argument('-ua', action='store', default='dtwp-sfwporn/0.2 by sarkybogmozg', 
                         type=str,
-                        dest='user_agent', help='User-Agent to present when retriving links and images.')                        
+                        dest='user_agent', help='User-Agent to present when retriving links and images.')
+
+    parser.add_argument('-r', action='store', default=None, 
+                        type=int,
+                        nargs=2,
+                        dest='min_resolution', help='The minimum resolution to accept')
+                        
+                        
                         
     return parser.parse_args()
     
     
-def main(subreddit, time_frame, style, user_agent):
+def main(subreddit, time_frame, style, user_agent, min_resolution=None):
     
     
     #Be nice and set user-agent to something unique per:
@@ -110,12 +118,32 @@ def main(subreddit, time_frame, style, user_agent):
     j = json.loads(reddit_page)
     
     #only support jpegs for now
-    img_urls = [i['data']['url'] for i in j['data']['children'] if i['data']['url'].endswith('.jpg')]
+    ppimgs = [(i['data']['url'], i['data']['title']) 
+               for i in j['data']['children'] if i['data']['url'].endswith('.jpg')]
     
+    #Parse the resolution from the title
+    if min_resolution is not None:
+        imgs = []
+        r = re.compile(".*\[\s*(\d+)\s*[xX\*\xd7\-]?\s*(\d+)\s*\].*", re.UNICODE)
+        for url, n in ppimgs:
+            m = r.match(n)
+            if m is not None:
+                res_of_image = m.groups()
+                print res_of_image
+                if int(res_of_image[0]) >= min_resolution[0] and int(res_of_image[1]) >= min_resolution[1]:
+                    imgs.append((url, n))
+                else:
+                    print "Too low:", res_of_image
+            else:
+                print "Warning failed to parse resolution: ", url, n
+    else:
+        imgs = ppimgs
+        
+    print len(imgs), len(ppimgs)
     #Get best image for period
-    if len(img_urls):
-        image = get_page(img_urls[0], headers)
-        print img_urls[0]
+    if len(imgs):
+        image = get_page(imgs[0][0], headers)
+        print imgs[0][0]
         
         #temp file
         td = tempfile.gettempdir()
