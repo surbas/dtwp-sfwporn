@@ -26,7 +26,6 @@ TODO
 ----
 * Logging
 * Limiting image selection to certain resolutions
-* better argument support
 * multisubedit support
 * cheeseshop
 * Readme Again
