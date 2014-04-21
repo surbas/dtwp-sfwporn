@@ -25,7 +25,7 @@ in dtwp-reddit-porn directory:
 TODO
 ----
 * Logging
-* Limiting image selection to certain resolutions
+* Limiting image selection to certain aspect ratios
 * multisubedit support
 * cheeseshop
 * Readme Again
