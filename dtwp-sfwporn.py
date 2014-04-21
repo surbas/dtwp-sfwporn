@@ -68,7 +68,7 @@ def set_wallpaper(file_path, style):
     
 def _parse_args():
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('-s', action='store', default='EarthPorn', type=str,
                         dest='subreddit',
@@ -83,7 +83,7 @@ def _parse_args():
     parser.add_argument('-y', action='store', default='fit', 
                         choices=['center', 'tile', 'stretch', 'fill', 'fit'], 
                         type=str,
-                        dest='style', help='The way the wallpaper should be is to be displayed on desktop')
+                        dest='style', help='The way the wallpaper should be displayed on desktop')
                         
     parser.add_argument('-ua', action='store', default='dtwp-sfwporn/0.1 by sarkybogmozg', 
                         type=str,
