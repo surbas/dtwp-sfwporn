@@ -139,11 +139,9 @@ def main(subreddit, time_frame, style, user_agent, min_resolution=None):
     else:
         imgs = ppimgs
         
-    print len(imgs), len(ppimgs)
     #Get best image for period
     if len(imgs):
         image = get_page(imgs[0][0], headers)
-        print imgs[0][0]
         
         #temp file
         td = tempfile.gettempdir()
