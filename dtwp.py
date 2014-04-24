@@ -142,7 +142,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
     
     #Logging
     td = tempfile.gettempdir()
-    setup_logging(td, 'dtwp-sfwporn.log', logging.DEBUG)
+    setup_logging(td, 'dtwp-sfwporn.log')
 
     logger.info('Hello')
     

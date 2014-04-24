@@ -20,12 +20,12 @@ Run
 ---
 in dtwp-reddit-porn directory:
 
-    python dtwp-reddit-porn.py
+    python dtwp.py
 
 TODO
 ----
+* support for imgur links with out '.jpg'
 * Limiting image selection to certain aspect ratios
-* multisubedit support
 * cheeseshop
 * Readme Again
 * python 3 support
