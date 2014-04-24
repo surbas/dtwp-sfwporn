@@ -5,8 +5,10 @@ import json
 import logging
 import logging.handlers
 import os
+import pprint
 import re
 import tempfile
+import time
 import urllib
 import urllib2
 import _winreg as winreg
@@ -75,8 +77,9 @@ def _parse_args():
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('-s', action='store', default='EarthPorn', type=str,
-                        dest='subreddit',
+    parser.add_argument('-s', action='store', default=['EarthPorn', 'SpacePorn'], type=str,
+                        dest='subreddits',
+                        nargs='+',
                         help='Subreddit to get images from.')
 
     parser.add_argument('-t', action='store', default='day', 
@@ -135,11 +138,11 @@ def setup_logging(log_file_dir, log_file_name, level=None):
     logger.addHandler(ch)
     
     
-def main(subreddit, time_frame, style, user_agent, min_resolution=None):
+def main(subreddits, time_frame, style, user_agent, min_resolution=None):
     
     #Logging
     td = tempfile.gettempdir()
-    setup_logging(td, 'dtwp-sfwporn.log', logging.WARN)
+    setup_logging(td, 'dtwp-sfwporn.log', logging.DEBUG)
 
     logger.info('Hello')
     
@@ -151,42 +154,49 @@ def main(subreddit, time_frame, style, user_agent, min_resolution=None):
 
     url_tempate = 'http://www.reddit.com/r/{}/top.json'
     get_params = {'t' : time_frame,
-              'limit' : '10'}
-              
-    reddit_page = get_page(url_tempate.format(subreddit), headers, get_params)
-        
-    j = json.loads(reddit_page)
+              'limit' : '5'}
+    listings = []
     
-    #only support jpegs for now
-    ppimgs = [(i['data']['url'], i['data']['title']) 
-               for i in j['data']['children'] if i['data']['url'].endswith('.jpg')]
-               
-    logger.debug('ppimgs: %s', ppimgs)
+    for s in subreddits:
+        reddit_page = get_page(url_tempate.format(s), headers, get_params)
+        
+        j = json.loads(reddit_page)
+        
+        #Only support jpegs for now.
+        for i in j['data']['children']:
+            if i['data']['url'].endswith('.jpg'):
+                listings.append(i['data'])
+
+        #play by the rules
+        time.sleep(2)
+
+    listings.sort(key=lambda i: i['score'], reverse=True)
+    logger.debug('listings: %s', pprint.pformat([(l['score'], l['title']) for l in listings]))
+    logger.debug('Len %s', len(listings))
     
     #Parse the resolution from the title
     if min_resolution is not None:
         imgs = []
         r = re.compile(".*\[\s*(\d+)\s*[xX\*\xd7\-]?\s*(\d+)\s*\].*", re.UNICODE)
-        for url, n in ppimgs:
-            m = r.match(n)
+        for i in listings:
+            m = r.match(i['title'])
             if m is not None:
                 res_of_image = m.groups()
                 logger.debug('res_of_image:', res_of_image)
                 if int(res_of_image[0]) >= min_resolution[0] and int(res_of_image[1]) >= min_resolution[1]:
-                    imgs.append((url, n))
+                    imgs.append(i)
                 else:
                     logger.debug("Resolution is too low")
             else:
-                logger.warn("Failed to parse resolution: %s, %s", n, url)
+                logger.warn("Failed to parse resolution: %s", i)
     else:
-        imgs = ppimgs
+        imgs = listings
         
-    #Get best image for period
+    #Get highest scoring image for period
     if len(imgs):
-        image = get_page(imgs[0][0], headers)
+        image = get_page(imgs[0]['url'], headers)
         
         #temp file
-        
         tf = os.path.join(td, 'dtwp-sfwporn.jpg')
         with open(tf, 'wb') as img_file:
             img_file.write(image)
