@@ -11,6 +11,7 @@ import tempfile
 import time
 import urllib
 import urllib2
+import urlparse
 import _winreg as winreg
 
 logger = logging.getLogger(__name__)
@@ -72,6 +73,12 @@ def set_wallpaper(file_path, style):
     #see http://msdn.microsoft.com/en-us/library/windows/desktop/ms724947%28v=vs.85%29.aspx
     rtn = ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, file_path,
                                                 SPIF_UPDATEINIFILE + SPIF_SENDCHANGE)
+                                                
+    if not rtn:
+        print ctypes.GetLastError()
+        raise ctypes.WinError()
+    logger.debug(rtn)
+    print rtn
     
 def _parse_args():
 
@@ -142,7 +149,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
     
     #Logging
     td = tempfile.gettempdir()
-    setup_logging(td, 'dtwp-sfwporn.log')
+    setup_logging(td, 'dtwp-sfwporn.log', logging.WARN)
 
     logger.info('Hello')
     
@@ -151,11 +158,18 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
     headers = {
         'User-Agent': user_agent
     }
+    
+    
 
     url_tempate = 'http://www.reddit.com/r/{}/top.json'
     get_params = {'t' : time_frame,
               'limit' : '5'}
     listings = []
+    
+    imgur_api_tempate = 'https://api.imgur.com/2/image/{}'
+    imgur_type_re = re.compile(r'<type>(.+)</type>')
+    imgur_orginal_re = re.compile(r'<original>(.+)</original>')
+    
     
     for s in subreddits:
         reddit_page = get_page(url_tempate.format(s), headers, get_params)
@@ -164,14 +178,34 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
         
         #Only support jpegs for now.
         for i in j['data']['children']:
-            if i['data']['url'].endswith('.jpg'):
-                listings.append(i['data'])
+            l = i['data']
+            url_parts = urlparse.urlsplit(l['url'])
+            if url_parts.path.endswith('jpg'):
+                l['good_url'] = l['url']
+            elif url_parts.netloc == 'imgur.com' and '.' not in url_parts.path:
+                logger.debug("Have to ask imgur %s", url_parts)
+                id = url_parts.path.split('/')[-1]
+                imgur_xml = get_page(imgur_api_tempate.format(id), headers)
+                m = imgur_type_re.search(imgur_xml)
+                if m is not None and m.groups()[0] == 'image/jpeg':
+                    m = imgur_orginal_re.search(imgur_xml)
+                    
+                    if m is not None:
+                        logger.debug("Good URL! imgur %s", m.groups()[0])
+                        l['good_url'] =  m.groups()[0]
+                    else:
+                        logger.debug("No original? %s", imgur_xml)
+                        
+                else:
+                    logger.debug("Not a jpg? imgur %s", imgur_xml)
+                
+            listings.append(l)
 
         #play by the rules
         time.sleep(2)
 
     listings.sort(key=lambda i: i['score'], reverse=True)
-    logger.debug('listings: %s', pprint.pformat([(l['score'], l['title']) for l in listings]))
+    logger.debug('listings: %s', pprint.pformat([(l['score'], l['title'], l['good_url']) for l in listings]))
     logger.debug('Len %s', len(listings))
     
     #Parse the resolution from the title
@@ -194,7 +228,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
         
     #Get highest scoring image for period
     if len(imgs):
-        image = get_page(imgs[0]['url'], headers)
+        image = get_page(imgs[0]['good_url'], headers)
         
         #temp file
         tf = os.path.join(td, 'dtwp-sfwporn.jpg')

@@ -24,7 +24,6 @@ in dtwp-reddit-porn directory:
 
 TODO
 ----
-* support for imgur links with out '.jpg'
 * Limiting image selection to certain aspect ratios
 * cheeseshop
 * Readme Again
