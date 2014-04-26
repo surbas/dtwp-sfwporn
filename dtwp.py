@@ -75,10 +75,9 @@ def set_wallpaper(file_path, style):
                                                 SPIF_UPDATEINIFILE + SPIF_SENDCHANGE)
                                                 
     if not rtn:
-        print ctypes.GetLastError()
+        logger.debug("GetLastError: %s", ctypes.GetLastError()) 
         raise ctypes.WinError()
-    logger.debug(rtn)
-    print rtn
+    logger.debug("rtn: %s", rtn)
     
 def _parse_args():
 
@@ -198,7 +197,10 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
                         
                 else:
                     logger.debug("Not a jpg? imgur %s", imgur_xml)
-                
+            else:
+                logger.debug("Not a jpg or not imgur.com %s", url_parts)
+                continue
+            
             listings.append(l)
 
         #play by the rules
