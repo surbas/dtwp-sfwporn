@@ -121,14 +121,7 @@ def _parse_args():
                         type=int,
                         nargs=2,
                         dest='min_resolution', help='The minimum resolution to accept')
-                        
-    # parser.add_argument('-a', action='store', default=None, 
-                        # type=float,
-                        # nargs='?',
-                        # const=.01,
-                        # dest='art', help='Select only images with an apect ratio')
-                        
-                        
+
                         
     return parser.parse_args()
     
@@ -164,11 +157,8 @@ def setup_logging(log_file_dir, log_file_name, level=None):
     logger.addHandler(ch)
     
     
-def main(subreddits, time_frame, style, user_agent, min_resolution=None):
+def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio, aspect_ratio_tolerance):
 
-    #Logging
-    td = tempfile.gettempdir()
-    setup_logging(td, 'dtwp-sfwporn.log', logging.WARN)
 
     logger.info('Hello')
     
@@ -252,6 +242,9 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
     if len(imgs):
         image = get_page(imgs[0]['good_url'], headers)
         
+        #Logging
+        td = tempfile.gettempdir()
+        
         #temp file
         tf = os.path.join(td, 'dtwp-sfwporn.jpg')
         with open(tf, 'wb') as img_file:
@@ -267,5 +260,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution=None):
 
 
 if __name__ == '__main__':
+    setup_logging('', 'dtwp-sfwporn.log', logging.DEBUG)
     args = _parse_args()
+    logger.debug(args)
     main(**vars(args))
