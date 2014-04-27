@@ -45,15 +45,6 @@ def get_page(url, headers, get_params=None):
     else:
         return response.read()
 
-# class DesktopEnvironment(object):
-    # def determin_desktop_env():
-        # if sys.platform == 'win32'
-            # return 'win32'
-        # else:
-            # return 'unknown'
-
-    # def get_current_desktop_env():
-        # pass
         
 def get_desktop_size():
     return ctypes.windll.user32.GetSystemMetrics(SM_CXSCREEN), ctypes.windll.user32.GetSystemMetrics(SM_CYSCREEN)
@@ -121,7 +112,23 @@ def _parse_args():
                         type=int,
                         nargs=2,
                         dest='min_resolution', help='The minimum resolution to accept')
+                        
+    parser.add_argument('-a', action='store', default=None, const=-1,
+                        type=float,
+                        nargs='?',
+                        dest='aspect_ratio', 
+                        help="""Limits the image selected to an aspect ratio. If no argument follows, or if it is -1 
+                                then it uses the current desktop's aspect ratio. \n\r
+                                The tolerance (default 0) of the equality check can be set using "-o" followed by a float"""
+                        )
 
+    parser.add_argument('-o', action='store', default=0, const=0,
+                        type=float,
+                        nargs='?',
+                        dest='aspect_ratio_tolerance', 
+                        help="""Only used when is present -a is set". Sets the tolerance allowed when comparing the 
+                        aspect ratio of the image to the aspect ratio specified by "-a" """
+                        )
                         
     return parser.parse_args()
     
@@ -260,7 +267,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
 
 
 if __name__ == '__main__':
-    setup_logging('', 'dtwp-sfwporn.log', logging.DEBUG)
+    setup_logging('logs', 'dtwp-sfwporn.log', logging.DEBUG)
     args = _parse_args()
     logger.debug(args)
     main(**vars(args))
