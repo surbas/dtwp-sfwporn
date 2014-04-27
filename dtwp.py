@@ -166,7 +166,6 @@ def setup_logging(log_file_dir, log_file_name, level=None):
     
 def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio, aspect_ratio_tolerance):
 
-
     logger.info('Hello')
     
     #Be nice and set user-agent to something unique per:
@@ -174,9 +173,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
     headers = {
         'User-Agent': user_agent
     }
-    
-    
-
+ 
     url_tempate = 'http://www.reddit.com/r/{}/top.json'
     get_params = {'t' : time_frame,
               'limit' : '5'}
@@ -185,7 +182,6 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
     imgur_api_tempate = 'https://api.imgur.com/2/image/{}'
     imgur_type_re = re.compile(r'<type>(.+)</type>')
     imgur_orginal_re = re.compile(r'<original>(.+)</original>')
-    
     
     for s in subreddits:
         reddit_page = get_page(url_tempate.format(s), headers, get_params)
@@ -267,7 +263,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
 
 
 if __name__ == '__main__':
-    setup_logging('logs', 'dtwp-sfwporn.log', logging.DEBUG)
+    setup_logging('logs', 'dtwp-sfwporn.log', logging.WARN)
     args = _parse_args()
     logger.debug(args)
     main(**vars(args))
