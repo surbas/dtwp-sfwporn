@@ -21,9 +21,11 @@ SPI_SETDESKWALLPAPER = 20
 SPIF_UPDATEINIFILE = 1
 SPIF_SENDCHANGE = 2
 
+SM_CXSCREEN = 0
+SM_CYSCREEN = 1
+
 def get_page(url, headers, get_params=None):
 
-    
     if get_params is not None:
         data = urllib.urlencode(get_params)
         rurl = '{}?{}'.format(url, data)
@@ -43,7 +45,19 @@ def get_page(url, headers, get_params=None):
     else:
         return response.read()
 
+# class DesktopEnvironment(object):
+    # def determin_desktop_env():
+        # if sys.platform == 'win32'
+            # return 'win32'
+        # else:
+            # return 'unknown'
 
+    # def get_current_desktop_env():
+        # pass
+        
+def get_desktop_size():
+    return ctypes.windll.user32.GetSystemMetrics(SM_CXSCREEN), ctypes.windll.user32.GetSystemMetrics(SM_CYSCREEN)
+       
 def set_wallpaper(file_path, style):
     """Modeled on http://code.msdn.microsoft.com/windowsdesktop/CSSetDesktopWallpaper-2107409c/sourcecode?fileId=21700&pathId=734742078"""
     
@@ -108,6 +122,12 @@ def _parse_args():
                         nargs=2,
                         dest='min_resolution', help='The minimum resolution to accept')
                         
+    # parser.add_argument('-a', action='store', default=None, 
+                        # type=float,
+                        # nargs='?',
+                        # const=.01,
+                        # dest='art', help='Select only images with an apect ratio')
+                        
                         
                         
     return parser.parse_args()
@@ -145,7 +165,7 @@ def setup_logging(log_file_dir, log_file_name, level=None):
     
     
 def main(subreddits, time_frame, style, user_agent, min_resolution=None):
-    
+
     #Logging
     td = tempfile.gettempdir()
     setup_logging(td, 'dtwp-sfwporn.log', logging.WARN)
