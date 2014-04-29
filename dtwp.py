@@ -1,5 +1,4 @@
 import argparse
-import ctypes
 import datetime
 import json
 import logging
@@ -12,17 +11,12 @@ import time
 import urllib
 import urllib2
 import urlparse
-import _winreg as winreg
+
+
+import desktop_env 
 
 logger = logging.getLogger(__name__)
 
-#Consts
-SPI_SETDESKWALLPAPER = 20
-SPIF_UPDATEINIFILE = 1
-SPIF_SENDCHANGE = 2
-
-SM_CXSCREEN = 0
-SM_CYSCREEN = 1
 
 def get_page(url, headers, get_params=None):
 
@@ -44,46 +38,7 @@ def get_page(url, headers, get_params=None):
         logger.error('Error code: ', e.code)
     else:
         return response.read()
-
-        
-def get_desktop_size():
-    return ctypes.windll.user32.GetSystemMetrics(SM_CXSCREEN), ctypes.windll.user32.GetSystemMetrics(SM_CYSCREEN)
-       
-def set_wallpaper(file_path, style):
-    """Modeled on http://code.msdn.microsoft.com/windowsdesktop/CSSetDesktopWallpaper-2107409c/sourcecode?fileId=21700&pathId=734742078"""
-    
-    if style == 'center':
-        tw = '0'
-        wps = '0'
-    elif style == 'tile':
-        tw = '1'
-        wps = '0'
-    elif style == 'stretch':
-        tw = '0'
-        wps = '2'
-    elif style == 'fill':
-        tw = '0'
-        wps = '6'
-    elif style == 'fit':
-        tw = '0'
-        wps = '10'
-    else:
-        raise ArgumentError('{} is not supported!'.format(style))
-
-    k = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Control Panel\Desktop', 0, winreg.KEY_ALL_ACCESS)
-    winreg.SetValueEx(k, 'TileWallpaper', 0, winreg.REG_SZ, tw)
-    winreg.SetValueEx(k, 'WallpaperStyle', 0, winreg.REG_SZ, wps)
-    winreg.CloseKey(k)
-    
-    #see http://msdn.microsoft.com/en-us/library/windows/desktop/ms724947%28v=vs.85%29.aspx
-    rtn = ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, file_path,
-                                                SPIF_UPDATEINIFILE + SPIF_SENDCHANGE)
-                                                
-    if not rtn:
-        logger.debug("GetLastError: %s", ctypes.GetLastError()) 
-        raise ctypes.WinError()
-    logger.debug("rtn: %s", rtn)
-    
+   
 def _parse_args():
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -167,6 +122,8 @@ def setup_logging(log_file_dir, log_file_name, level=None):
 def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio, aspect_ratio_tolerance):
 
     logger.info('Hello')
+    
+    de = desktop_env.DesktopEnvironment.get_current_desktop_env()
     
     #Be nice and set user-agent to something unique per:
     #https://github.com/reddit/reddit/wiki/API
@@ -253,7 +210,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
         with open(tf, 'wb') as img_file:
             img_file.write(image)
 
-        set_wallpaper(tf, style)
+        de.set_wallpaper(tf, style)
 
     else:
         logger.warn('No acceptable images found %s within the time frame "%s."', subreddit, time_frame)
