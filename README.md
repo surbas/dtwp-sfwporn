@@ -24,7 +24,7 @@ in dtwp-reddit-porn directory:
 
 TODO
 ----
-* Limiting image selection to certain aspect ratios
+* png support (prob need PIL support)
 * cheeseshop
 * Readme Again
 * python 3 support
@@ -32,5 +32,4 @@ TODO
 * gnome support
 * kde support
 * Support other SFW Porn sources
-* png support (prob need PIL support)
 * do something like this eventually http://www.kenstone.net/fcp_homepage/faking_it.html (prob need PIL support)

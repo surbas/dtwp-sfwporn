@@ -1,3 +1,5 @@
+from __future__ import division
+
 import logging
 import sys
 import ctypes
@@ -5,7 +7,11 @@ import _winreg as winreg
 
 logger = logging.getLogger(__name__)
 
+
 class DesktopEnvironment(object):
+
+    def __init__(self):
+        self._ar = None
     
     @staticmethod
     def determin_desktop_env():
@@ -25,6 +31,9 @@ class DesktopEnvironment(object):
     def get_desktop_size(self):
         raise NotImplementedError('Please get a supported DesktopEnviroment class by calling get_current_desktop_env()')
         
+    def get_desktop_aspect_ratio(self):
+        raise NotImplementedError('Please get a supported DesktopEnviroment class by calling get_current_desktop_env()')
+        
     def set_wallpaper(self, file_path, style):
         #going to want to translate styles to common name.
         return self._set_wallpaper(file_path, style)
@@ -39,8 +48,18 @@ class WindowsDesktopEnviroment(DesktopEnvironment):
     SM_CXSCREEN = 0
     SM_CYSCREEN = 1
     
+    def __init__(self):
+        return super(WindowsDesktopEnviroment, self).__init__()
+    
     def get_desktop_size(self):
         return ctypes.windll.user32.GetSystemMetrics(self.SM_CXSCREEN), ctypes.windll.user32.GetSystemMetrics(self.SM_CYSCREEN)
+        
+    def get_desktop_aspect_ratio(self):
+        if self._ar is None:
+            size = self.get_desktop_size()
+            self._ar = size[0]/size[1]
+        
+        return self._ar
        
     def _set_wallpaper(self, file_path, style):
         """Modeled on http://code.msdn.microsoft.com/windowsdesktop/CSSetDesktopWallpaper-2107409c/sourcecode?fileId=21700&pathId=734742078"""
