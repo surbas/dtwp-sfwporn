@@ -129,7 +129,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
                     if (desktop_ar - aspect_ratio_tolerance) <= ar_of_image <= (desktop_ar + aspect_ratio_tolerance):
                         imgs.append(i)
                     else:
-                        logger.debug("aspect_ratio is a mismatch %s <> %s +- %s", desktop_ar, 
+                        logger.debug("Aspect_ratio is a mismatch %s <> %s +- %s", desktop_ar, 
                                      ar_of_image, aspect_ratio_tolerance)     
 
                 else:
@@ -241,7 +241,7 @@ def _parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
-    _setup_logging('logs', 'dtwp-sfwporn.log', logging.DEBUG)
+    _setup_logging('logs', 'dtwp-sfwporn.log', logging.WARN)
     args = _parse_args()
     logger.debug(args)
     main(**vars(args))
