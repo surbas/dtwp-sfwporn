@@ -24,6 +24,9 @@ in dtwp-reddit-porn directory:
 
 TODO
 ----
+* Support for picking random image from reddit
+    * Need to include a parameter for sample size
+* Support for picking random image from folder
 * png support (prob need PIL support)
 * cheeseshop
 * Readme Again
