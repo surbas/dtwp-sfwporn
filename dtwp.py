@@ -108,7 +108,7 @@ def main(subreddits, time_frame, style, user_agent, min_resolution, aspect_ratio
     #Parse the resolution from the title
     if min_resolution is not None or aspect_ratio is not None:
         imgs = []
-        r = re.compile(".*\[\s*(\d+)\s*[xX\*\xd7\-]?\s*(\d+)\s*\].*", re.UNICODE)
+        r = re.compile(".*[\[\(]\s*(\d+)\s*[xX\*\xd7\-]?\s*(\d+)\s*[\]\)].*", re.UNICODE)
         for i in listings:
             m = r.match(i['title'])
             if m is not None:
